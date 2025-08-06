@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Admission Data Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .upload-section {
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
+        }
+
+        .file-input-wrapper {
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50px;
+            padding: 15px 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .file-input-wrapper:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .controls {
+            padding: 30px;
+            background: white;
+            display: none;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .search-input, .percentile-input {
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus, .percentile-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .clear-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+        }
+
+        .stats {
+            display: none;
+            padding: 20px 30px;
+            background: #f0f8ff;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: bold;
+        }
+
+        .results {
+            padding: 30px;
+            display: none;
+        }
+
+        .results-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .results-count {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .college-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
+
+        .college-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #4facfe;
+        }
+
+        .college-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .college-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .branch-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .branch-name {
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+
+        .branch-code {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .percentile {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #4facfe;
+        }
+
+        @media (max-width: 768px) {
+            .college-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 College Admission Data Analyzer</h1>
+            <p>Upload your TXT file and explore college admission data with advanced search and filtering</p>
+        </div>
+
+        <div class="upload-section">
+            <label for="txtFile" class="file-input-wrapper">
+                📂 Choose TXT File
+                <input type="file" id="txtFile" class="file-input" accept=".txt" />
+            </label>
+            <p style="margin-top: 15px; color: #666;">Upload your college admission data TXT file</p>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalColleges">0</div>
+                    <div class="stat-label">Total Colleges</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalBranches">0</div>
+                    <div class="stat-label">Total Branches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgPercentile">0%</div>
+                    <div class="stat-label">Avg Percentile</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="maxPercentile">0%</div>
+                    <div class="stat-label">Max Percentile</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls" id="controls">
+            <div class="search-group">
+                <label for="collegeSearch">🏫 Search College:</label>
+                <input type="text" id="collegeSearch" class="search-input" placeholder="Enter college name...">
+            </div>
+            
+            <div class="search-group">
+                <label for="branchSearch">🔬 Search Branch:</label>
+                <input type="text" id="branchSearch" class="search-input" placeholder="Enter branch name...">
+            </div>
+            
+            <div class="search-group">
+                <label for="percentileFilter">📊 Min Percentile:</label>
+                <input type="number" id="percentileFilter" class="percentile-input" placeholder="e.g., 85" min="0" max="100">
+            </div>
+            
+            <button id="clearFilters" class="clear-btn">🗑️ Clear All</button>
+        </div>
+
+        <div class="results" id="results">
+            <div class="results-header">
+                <div class="results-count" id="resultsCount">0 results found</div>
+                <div class="sort-controls">
+                    <label for="sortBy">Sort by:</label>
+                    <select id="sortBy" class="sort-select">
+                        <option value="percentile-desc">Percentile (High to Low)</option>
+                        <option value="percentile-asc">Percentile (Low to High)</option>
+                        <option value="college-asc">College Name (A-Z)</option>
+                        <option value="college-desc">College Name (Z-A)</option>
+                        <option value="branch-asc">Branch Name (A-Z)</option>
+                        <option value="branch-desc">Branch Name (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="college-grid" id="collegeGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        let collegeData = [];
+        let filteredData = [];
+
+        // File upload handler
+        document.getElementById('txtFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    parseTXTData(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function parseTXTData(txtContent) {
+            const lines = txtContent.split('\n');
+            collegeData = [];
+            
+            let currentCollege = '';
+            let currentBranch = '';
+            let currentCode = '';
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                
+                // Remove quotes if present
+                line = line.replace(/^"|"$/g, '');
+                
+                // Extract college name (pattern: 5 digits - college name)
+                if (line.match(/^\d{5}\s*-\s*(.+)$/)) {
+                    const match = line.match(/^\d{5}\s*-\s*(.+)$/);
+                    currentCollege = match[1].trim();
+                    continue;
+                }
+                
+                // Extract branch name and code (pattern: 10 digits - branch name)
+                if (line.match(/^\d{10}\s*-\s*(.+)$/)) {
+                    const match = line.match(/^(\d{10})\s*-\s*(.+)$/);
+                    currentCode = match[1];
+                    currentBranch = match[2].trim();
+                    continue;
+                }
+                
+                // Extract percentile data from lines containing percentages in parentheses
+                if (line.includes('(') && line.includes(')') && currentCollege && currentBranch) {
+                    // Look for pattern with numbers followed by percentages in parentheses
+                    const percentileMatches = line.match(/\(([0-9.]+)\)/g);
+                    if (percentileMatches && percentileMatches.length > 0) {
+                        // Get the first percentile (GOPENS typically)
+                        const firstPercentile = percentileMatches[0].replace(/[()]/g, '');
+                        const percentile = parseFloat(firstPercentile);
+                        
+                        if (!isNaN(percentile) && percentile > 0) {
+                            collegeData.push({
+                                college: currentCollege,
+                                branch: currentBranch,
+                                code: currentCode,
+                                percentile: percentile
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Remove duplicates based on college, branch, and code combination
+            collegeData = collegeData.filter((item, index, self) => 
+                index === self.findIndex(t => 
+                    t.college === item.college && 
+                    t.branch === item.branch && 
+                    t.code === item.code
+                )
+            );
+
+            console.log('Parsed data:', collegeData); // For debugging
+            displayStats();
+            showControls();
+            filterAndDisplayResults();
+        }
+
+        function displayStats() {
+            const totalColleges = new Set(collegeData.map(item => item.college)).size;
+            const totalBranches = collegeData.length;
+            const percentiles = collegeData.map(item => item.percentile);
+            const avgPercentile = percentiles.reduce((a, b) => a + b, 0) / percentiles.length;
+            const maxPercentile = Math.max(...percentiles);
+
+            document.getElementById('totalColleges').textContent = totalColleges;
+            document.getElementById('totalBranches').textContent = totalBranches;
+            document.getElementById('avgPercentile').textContent = avgPercentile.toFixed(1) + '%';
+            document.getElementById('maxPercentile').textContent = maxPercentile.toFixed(1) + '%';
+            
+            document.getElementById('stats').style.display = 'block';
+        }
+
+        function showControls() {
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function filterAndDisplayResults() {
+            const collegeSearch = document.getElementById('collegeSearch').value.toLowerCase();
+            const branchSearch = document.getElementById('branchSearch').value.toLowerCase();
+            const minPercentile = parseFloat(document.getElementById('percentileFilter').value) || 0;
+
+            filteredData = collegeData.filter(item => {
+                const collegeMatch = item.college.toLowerCase().includes(collegeSearch);
+                const branchMatch = item.branch.toLowerCase().includes(branchSearch);
+                const percentileMatch = item.percentile >= minPercentile;
+                
+                return collegeMatch && branchMatch && percentileMatch;
+            });
+
+            sortResults();
+            displayResults();
+        }
+
+        function sortResults() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            filteredData.sort((a, b) => {
+                switch(sortBy) {
+                    case 'percentile-desc':
+                        return b.percentile - a.percentile;
+                    case 'percentile-asc':
+                        return a.percentile - b.percentile;
+                    case 'college-asc':
+                        return a.college.localeCompare(b.college);
+                    case 'college-desc':
+                        return b.college.localeCompare(a.college);
+                    case 'branch-asc':
+                        return a.branch.localeCompare(b.branch);
+                    case 'branch-desc':
+                        return b.branch.localeCompare(a.branch);
+                    default:
+                        return b.percentile - a.percentile;
+                }
+            });
+        }
+
+        function displayResults() {
+            const grid = document.getElementById('collegeGrid');
+            const count = document.getElementById('resultsCount');
+            
+            count.textContent = `${filteredData.length} results found`;
+            
+            if (filteredData.length === 0) {
+                grid.innerHTML = '<div class="no-results">🔍 No results found. Try adjusting your search criteria.</div>';
+                return;
+            }
+
+            const cardsHTML = filteredData.map(item => `
+                <div class="college-card">
+                    <div class="college-name">${item.college}</div>
+                    <div class="branch-info">
+                        <div class="branch-name">${item.branch}</div>
+                        <div class="branch-code">Code: ${item.code}</div>
+                    </div>
+                    <div class="percentile">${item.percentile.toFixed(1)}%</div>
+                </div>
+            `).join('');
+
+            grid.innerHTML = cardsHTML;
+        }
+
+        // Event listeners
+        document.getElementById('collegeSearch').addEventListener('input', filterAndDisplayResults);
+        document.getElementById('branchSearch').addEventListener('input', filterAndDisplayResults);
+        document.getElementById('percentileFilter').addEventListener('input', filterAndDisplayResults);
+        document.getElementById('sortBy').addEventListener('change', () => {
+            sortResults();
+            displayResults();
+        });
+
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            document.getElementById('collegeSearch').value = '';
+            document.getElementById('branchSearch').value = '';
+            document.getElementById('percentileFilter').value = '';
+            filterAndDisplayResults();
+        });
+    </script>
+</body>
+</html>
