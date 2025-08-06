@@ -328,6 +328,11 @@
                 <label for="branchSearch">🔬 Search Branch:</label>
                 <input type="text" id="branchSearch" class="search-input" placeholder="Enter branch name...">
             </div>
+
+            <div class="search-group">
+                <label for="citySearch">🌆 Search City:</label>
+                <input type="text" id="citySearch" class="search-input" placeholder="Enter city name...">
+            </div>
             
             <div class="search-group">
                 <label for="percentileFilter">📊 Min Percentile:</label>
@@ -379,6 +384,7 @@
             let currentCollege = '';
             let currentBranch = '';
             let currentCode = '';
+            let currentCity = '';
             
             for (let line of lines) {
                 line = line.trim();
@@ -391,6 +397,9 @@
                 if (line.match(/^\d{5}\s*-\s*(.+)$/)) {
                     const match = line.match(/^\d{5}\s*-\s*(.+)$/);
                     currentCollege = match[1].trim();
+                    // Try to extract city from college name (assume format: "College Name, City")
+                    const cityMatch = currentCollege.match(/,([^,]+)$/);
+                    currentCity = cityMatch ? cityMatch[1].trim() : '';
                     continue;
                 }
                 
@@ -416,7 +425,8 @@
                                 college: currentCollege,
                                 branch: currentBranch,
                                 code: currentCode,
-                                percentile: percentile
+                                percentile: percentile,
+                                city: currentCity
                             });
                         }
                     }
@@ -461,14 +471,16 @@
         function filterAndDisplayResults() {
             const collegeSearch = document.getElementById('collegeSearch').value.toLowerCase();
             const branchSearch = document.getElementById('branchSearch').value.toLowerCase();
+            const citySearch = document.getElementById('citySearch').value.toLowerCase();
             const minPercentile = parseFloat(document.getElementById('percentileFilter').value) || 0;
 
             filteredData = collegeData.filter(item => {
                 const collegeMatch = item.college.toLowerCase().includes(collegeSearch);
                 const branchMatch = item.branch.toLowerCase().includes(branchSearch);
+                const cityMatch = item.city.toLowerCase().includes(citySearch);
                 const percentileMatch = item.percentile >= minPercentile;
                 
-                return collegeMatch && branchMatch && percentileMatch;
+                return collegeMatch && branchMatch && cityMatch && percentileMatch;
             });
 
             sortResults();
@@ -526,6 +538,7 @@
         // Event listeners
         document.getElementById('collegeSearch').addEventListener('input', filterAndDisplayResults);
         document.getElementById('branchSearch').addEventListener('input', filterAndDisplayResults);
+        document.getElementById('citySearch').addEventListener('input', filterAndDisplayResults);
         document.getElementById('percentileFilter').addEventListener('input', filterAndDisplayResults);
         document.getElementById('sortBy').addEventListener('change', () => {
             sortResults();
@@ -535,6 +548,7 @@
         document.getElementById('clearFilters').addEventListener('click', () => {
             document.getElementById('collegeSearch').value = '';
             document.getElementById('branchSearch').value = '';
+            document.getElementById('citySearch').value = '';
             document.getElementById('percentileFilter').value = '';
             filterAndDisplayResults();
         });
